@@ -9,13 +9,16 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
         },
       },
     ],
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],  // import 시 확장자 생략 가능
   },
   devServer: {
     static: {
