@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>MyReact App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+      function createElement(type, props, ...children) {
+        // 컴포넌트 타입이 함수인 경우, 함수를 호출하여 컴포넌트를 생성합니다.
+        if (typeof type === "function") {
+          return type(props);
+        }
+        return { type, props: { ...props, children } };
+      }
+
+      // function createElement(type, props, ...children) {
+      //   return {
+      //     type, // 태그 이름 (예: 'div', 'h1') 또는 컴포넌트 함수
+      //     props: {
+      //       ...props, // 전달된 속성
+      //       children: children.map(
+      //         (child) =>
+      //           typeof child === "object"
+      //             ? child // 자식이 객체이면 그대로 둠
+      //             : createTextElement(child) // 문자열이면 텍스트 엘리먼트로 변환
+      //       ),
+      //     },
+      //   };
+      // }
+
+      // 텍스트 노드 생성 함수
+function createTextNode(text) {
+  return document.createTextNode(text);
+}
+
+// DOM 요소 생성 함수
+function createElementNode(vnode) {
+  return document.createElement(vnode.type);
+}
+
+// 속성 설정 함수
+function setAttributes(dom, props) {
+  Object.keys(props)
+    .filter(key => key !== 'children') // 자식 요소는 따로 처리하므로 제외합니다.
+    .forEach(key => (dom[key] = props[key])); // 속성을 DOM 요소에 설정합니다.
+}
+
+// 자식 요소 재귀적 렌더링 함수
+function appendChildren(dom, children) {
+  children.forEach(child => render(child, dom));
+}
+
+// render 함수는 Virtual DOM을 실제 DOM으로 변환하여 페이지에 렌더링합니다.
+function render(vnode, container) {
+  // vnode가 문자열인 경우 텍스트 노드로 간주하고, 이를 DOM에 추가합니다.
+  if (typeof vnode === 'string') {
+    container.appendChild(createTextNode(vnode));
+    return;
+  }
+
+  // vnode가 객체인 경우, 그 타입에 해당하는 DOM 요소를 생성합니다.
+  const dom = createElementNode(vnode);
+
+  // vnode에 속성이 있는 경우, 각 속성을 DOM 요소에 설정합니다.
+  if (vnode.props) {
+    setAttributes(dom, vnode.props);
+  }
+
+  // vnode에 자식 요소가 있는 경우, 자식 요소를 재귀적으로 렌더링하여 DOM 요소에 추가합니다.
+  if (vnode.props.children) {
+    appendChildren(dom, vnode.props.children);
+  }
+
+  // 완성된 DOM 요소를 부모 컨테이너에 추가합니다.
+  container.appendChild(dom);
+}
+
+      // Test 컴포넌트를 정의합니다.
+      function Test(props) {
+        return createElement(
+          "div",
+          null,
+          createElement("h1", null, "안녕, ", props.name),
+          createElement("p", null, "이건 나의 컴포넌트야")
+        );
+      }
+      function App() {
+        return createElement(
+          "div",
+          null,
+          createElement(Test, { name: "리액트" })
+        );
+      }
+
+      // createElement 함수를 사용하여 App 컴포넌트를 생성합니다.
+      const element = createElement(App);
+
+      const root = document.getElementById("root");
+      render(element, root);
+    </script>
+  </body>
+</html>
